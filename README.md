@@ -6,7 +6,6 @@ A lightweight framework for building Audiobook Addon Protocol compliant servers 
 
 - **Minimalist API**: Create a working addon in ~10 lines of code.
 - **Protocol Enforcement**: Automatically handles `manifest.json`, Zod validation, and error codes.
-- **Debrid Utilities**: Includes `IDebridProvider` interface, `StreamResolverService`, and `Audio File Filter` to help build stream-resolution addons.
 - **Bun-Native**: High-performance implementation using `Bun.serve`.
 
 ## Installation
@@ -51,15 +50,10 @@ addon.listen(3000);
 
 ## Unified Addon (with Debrid)
 
-The SDK provides tools to build addons that resolve streams (e.g., using Debrid services). You just need to implement the `IDebridProvider` interface.
+The SDK provides the server plumbing. You can implement your own logic for resolving streams.
 
 ```typescript
-import { AddonServer, IDebridProvider, StreamResolverService } from "audioio-addon-sdk";
-
-// 1. Implement your provider (e.g., Real-Debrid, AllDebrid)
-class MyDebridProvider implements IDebridProvider {
-  // ... implement interface methods
-}
+import { AddonServer } from "audioio-addon-sdk";
 
 const addon = new AddonServer({
   id: "com.example.unified",
@@ -69,23 +63,23 @@ const addon = new AddonServer({
   capabilities: ["SEARCH", "CHECK_CACHE", "RESOLVE"],
 });
 
-const provider = new MyDebridProvider();
-const resolver = new StreamResolverService(provider);
-
 addon.onSearch(async (query) => {
   // ...
 });
 
 addon.onCheckCache(async (req) => {
-  const status = await provider.checkInstantAvailability(req.apiKey, req.infoHashes);
-  // ...
+  // Check your debrid provider
 });
 
 addon.onResolve(async (req) => {
-  const result = await resolver.resolve(req.apiKey, req.infoHash, {
-    requireInstant: req.requireInstant,
-  });
-  return { ...result, status: "ready" };
+  // Resolve stream URL
+  return { 
+    torrentId: "...",
+    infoHash: req.infoHash,
+    status: "ready",
+    files: [],
+    totalSize: 0
+  };
 });
 
 addon.listen(3000);

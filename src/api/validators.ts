@@ -80,6 +80,7 @@ export const ResolveRequestSchema = z.object({
   provider: z.string().min(1),
   apiKey: z.string().min(1),
   infoHash: z.string().regex(/^[a-fA-F0-9]{40}$/, "Invalid info hash format"),
+  fileIds: z.array(z.number().int()).optional(),
   requireInstant: z.boolean().optional(),
   maxWaitSeconds: z.number().int().positive().max(600).optional(),
 });
