@@ -49,7 +49,7 @@ export const ManifestSchema = z.object({
     })
     .optional(),
   author: z.string().optional(),
-  repository: z.string().url().optional(),
+  repository: z.url().optional(),
   license: z.string().optional(),
 });
 
