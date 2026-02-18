@@ -124,6 +124,7 @@ export interface CacheStatus {
   files?: Array<{
     filename: string;
     size: number;
+    path?: string;
   }>;
 }
 
@@ -141,6 +142,7 @@ export interface ResolveResponse {
     mimeType?: string;
     duration?: number | null;
     bitrate?: number | null;
+    path?: string;
   }>;
   totalSize: number;
 }
