@@ -81,8 +81,7 @@ export const ResolveRequestSchema = z.object({
   apiKey: z.string().min(1),
   infoHash: z.string().regex(/^[a-fA-F0-9]{40}$/, "Invalid info hash format"),
   fileIds: z.array(z.number().int()).optional(),
-  requireInstant: z.boolean().optional(),
-  maxWaitSeconds: z.number().int().positive().max(600).optional(),
+  torrentId: z.string().optional(),
 });
 
 export type ResolveRequest = z.infer<typeof ResolveRequestSchema>;
@@ -121,9 +120,12 @@ export interface SearchResponse {
 
 export interface CacheStatus {
   cached: boolean;
+  torrentId?: string;
   files?: Array<{
+    id?: string;
     filename: string;
     size: number;
+    torrentId?: string;
     path?: string;
   }>;
 }
@@ -133,16 +135,66 @@ export type CheckCacheResponse = Record<string, CacheStatus>;
 export interface ResolveResponse {
   torrentId: string;
   infoHash: string;
-  status: "ready" | "downloading" | "queued" | "error";
+  status:
+    | "ready"
+    | "partial"
+    | "downloading"
+    | "queued"
+    | "error"
+    | "selection_required";
   progress?: number;
   files: Array<{
+    id?: string;
     filename: string;
     url: string;
     size: number;
+    status?: "ready" | "downloading" | "queued" | "error";
     mimeType?: string;
     duration?: number | null;
     bitrate?: number | null;
     path?: string;
   }>;
   totalSize: number;
+  message?: string;
+  candidates?: Array<{
+    id: number;
+    filename: string;
+    path?: string;
+    size: number;
+    selected: boolean;
+  }>;
 }
+
+export const ProgressRequestSchema = z.object({
+  apiKey: z.string().min(1),
+  torrentId: z.string(),
+});
+
+export type ProgressRequest = z.infer<typeof ProgressRequestSchema>;
+
+export const ProgressResponseSchema = z.object({
+  infoHash: z.string(),
+  rdTorrentId: z.string().nullable(),
+  status: z.enum([
+    "queued",
+    "downloading",
+    "downloaded",
+    "selection_required",
+    "error",
+    "stale",
+    "not_found",
+  ]),
+  progress: z.number().min(0).max(100),
+  filename: z.string().nullable(),
+  files: z.array(
+    z.object({
+      id: z.string().optional(),
+      filename: z.string(),
+      path: z.string().optional(),
+      size: z.number(),
+      status: z.enum(["ready", "downloading", "queued", "error"]).optional(),
+    }),
+  ),
+});
+
+export type ProgressResponse = z.infer<typeof ProgressResponseSchema>;
