@@ -177,6 +177,7 @@ export const ProgressResponseSchema = z.object({
   rdTorrentId: z.string().nullable(),
   status: z.enum([
     "queued",
+    "uploading",
     "downloading",
     "downloaded",
     "selection_required",
