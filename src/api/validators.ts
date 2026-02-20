@@ -144,7 +144,7 @@ export interface ResolveResponse {
     | "selection_required";
   progress?: number;
   files: Array<{
-    id?: string;
+    id?: number;
     filename: string;
     url: string;
     size: number;
