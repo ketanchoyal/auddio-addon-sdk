@@ -13,8 +13,8 @@ import {
   CheckCacheRequestSchema,
   ResolveRequestSchema,
   ProgressRequestSchema,
-} from "./validators";
-import { z } from "zod";
+} from './validators';
+import { z } from 'zod';
 
 export class AddonServer {
   private manifest: Manifest;
@@ -25,19 +25,19 @@ export class AddonServer {
   private resolveHandler?: (req: ResolveRequest) => Promise<ResolveResponse>;
   private progressHandler?: (req: ProgressRequest) => Promise<ProgressResponse>;
 
-  constructor(manifest: Omit<Manifest, "protocolVersion" | "endpoints">) {
+  constructor(manifest: Omit<Manifest, 'protocolVersion' | 'endpoints'>) {
     const fullManifest: Manifest = {
       ...manifest,
-      protocolVersion: "1.0.0",
+      protocolVersion: '1.0.0',
       endpoints: {
-        search: manifest.capabilities.includes("SEARCH")
-          ? "/search"
+        search: manifest.capabilities.includes('SEARCH')
+          ? '/search'
           : undefined,
-        checkCache: manifest.capabilities.includes("CHECK_CACHE")
-          ? "/check-cache"
+        checkCache: manifest.capabilities.includes('CHECK_CACHE')
+          ? '/check-cache'
           : undefined,
-        resolve: manifest.capabilities.includes("RESOLVE")
-          ? "/resolve"
+        resolve: manifest.capabilities.includes('RESOLVE')
+          ? '/resolve'
           : undefined,
       },
     };
@@ -93,15 +93,15 @@ export class AddonServer {
         const path = url.pathname;
 
         try {
-          if (path === "/manifest.json" && req.method === "GET") {
+          if (path === '/manifest.json' && req.method === 'GET') {
             return Response.json(this.manifest);
           }
 
-          if (path === "/search" && req.method === "POST") {
+          if (path === '/search' && req.method === 'POST') {
             if (!this.searchHandler)
               return this.errorResponse(
-                "NOT_IMPLEMENTED",
-                "Search capability not configured",
+                'NOT_IMPLEMENTED',
+                'Search capability not configured',
                 501,
               );
             const body = await req.json();
@@ -110,11 +110,11 @@ export class AddonServer {
             return Response.json(result);
           }
 
-          if (path === "/check-cache" && req.method === "POST") {
+          if (path === '/check-cache' && req.method === 'POST') {
             if (!this.checkCacheHandler)
               return this.errorResponse(
-                "NOT_IMPLEMENTED",
-                "Check Cache capability not configured",
+                'NOT_IMPLEMENTED',
+                'Check Cache capability not configured',
                 501,
               );
             const body = await req.json();
@@ -123,11 +123,11 @@ export class AddonServer {
             return Response.json(result);
           }
 
-          if (path === "/resolve" && req.method === "POST") {
+          if (path === '/resolve' && req.method === 'POST') {
             if (!this.resolveHandler)
               return this.errorResponse(
-                "NOT_IMPLEMENTED",
-                "Resolve capability not configured",
+                'NOT_IMPLEMENTED',
+                'Resolve capability not configured',
                 501,
               );
             const body = await req.json();
@@ -136,28 +136,28 @@ export class AddonServer {
             return Response.json(result);
           }
 
-          if (path.startsWith("/progress/") && req.method === "GET") {
-            const torrentId = path.slice("/progress/".length);
+          if (path.startsWith('/progress/') && req.method === 'GET') {
+            const torrentId = path.slice('/progress/'.length);
             if (!torrentId)
               return this.errorResponse(
-                "INVALID_INPUT",
-                "torrentId is required",
+                'INVALID_INPUT',
+                'torrentId is required',
                 400,
               );
             if (!this.progressHandler)
               return this.errorResponse(
-                "NOT_IMPLEMENTED",
-                "Progress endpoint not configured",
+                'NOT_IMPLEMENTED',
+                'Progress endpoint not configured',
                 501,
               );
-            const authHeader = req.headers.get("Authorization");
-            const apiKey = authHeader?.startsWith("Bearer ")
+            const authHeader = req.headers.get('Authorization');
+            const apiKey = authHeader?.startsWith('Bearer ')
               ? authHeader.slice(7)
               : null;
             if (!apiKey)
               return this.errorResponse(
-                "UNAUTHORIZED",
-                "Authorization: Bearer <apiKey> required",
+                'UNAUTHORIZED',
+                'Authorization: Bearer <apiKey> required',
                 401,
               );
             const result = await this.progressHandler({ apiKey, torrentId });
@@ -165,7 +165,7 @@ export class AddonServer {
           }
 
           return this.errorResponse(
-            "NOT_FOUND",
+            'NOT_FOUND',
             `Endpoint ${path} not found`,
             404,
           );
@@ -184,18 +184,18 @@ export class AddonServer {
   private handleGlobalError(error: unknown): Response {
     if (error instanceof z.ZodError) {
       return this.errorResponse(
-        "INVALID_INPUT",
-        "Request validation failed",
+        'INVALID_INPUT',
+        'Request validation failed',
         400,
         error.issues,
       );
     }
 
-    console.error("[Addon Framework] Internal Error:", error);
+    console.error('[Addon Framework] Internal Error:', error);
     return this.errorResponse(
-      "INTERNAL_ERROR",
-      "An unexpected error occurred",
-      500,
+      (error as any).code || 'INTERNAL_ERROR',
+      (error as any).message || 'An unexpected error occurred',
+      (error as any).httpStatus || 500,
     );
   }
 
@@ -207,7 +207,7 @@ export class AddonServer {
   ): Response {
     return new Response(JSON.stringify({ error, message, details }), {
       status,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

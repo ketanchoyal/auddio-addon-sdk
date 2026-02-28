@@ -155,7 +155,6 @@ export interface ResolveResponse {
     path?: string;
   }>;
   totalSize: number;
-  message?: string;
   candidates?: Array<{
     id: number;
     filename: string;
