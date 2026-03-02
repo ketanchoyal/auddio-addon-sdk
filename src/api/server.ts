@@ -16,6 +16,13 @@ import {
 } from './validators';
 import { z } from 'zod';
 
+// CORS headers for web client support
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 export class AddonServer {
   private manifest: Manifest;
   private searchHandler?: (req: SearchRequest) => Promise<SearchResponse>;
@@ -92,9 +99,14 @@ export class AddonServer {
         const url = new URL(req.url);
         const path = url.pathname;
 
+        // Handle OPTIONS preflight requests for CORS
+        if (req.method === 'OPTIONS') {
+          return new Response(null, { status: 204, headers: CORS_HEADERS });
+        }
+
         try {
           if (path === '/manifest.json' && req.method === 'GET') {
-            return Response.json(this.manifest);
+            return Response.json(this.manifest, { headers: CORS_HEADERS });
           }
 
           if (path === '/search' && req.method === 'POST') {
@@ -107,7 +119,7 @@ export class AddonServer {
             const body = await req.json();
             const validated = SearchRequestSchema.parse(body);
             const result = await this.searchHandler(validated);
-            return Response.json(result);
+            return Response.json(result, { headers: CORS_HEADERS });
           }
 
           if (path === '/check-cache' && req.method === 'POST') {
@@ -120,7 +132,7 @@ export class AddonServer {
             const body = await req.json();
             const validated = CheckCacheRequestSchema.parse(body);
             const result = await this.checkCacheHandler(validated);
-            return Response.json(result);
+            return Response.json(result, { headers: CORS_HEADERS });
           }
 
           if (path === '/resolve' && req.method === 'POST') {
@@ -133,7 +145,7 @@ export class AddonServer {
             const body = await req.json();
             const validated = ResolveRequestSchema.parse(body);
             const result = await this.resolveHandler(validated);
-            return Response.json(result);
+            return Response.json(result, { headers: CORS_HEADERS });
           }
 
           if (path.startsWith('/progress/') && req.method === 'GET') {
@@ -161,7 +173,7 @@ export class AddonServer {
                 401,
               );
             const result = await this.progressHandler({ apiKey, torrentId });
-            return Response.json(result);
+            return Response.json(result, { headers: CORS_HEADERS });
           }
 
           return this.errorResponse(
@@ -207,7 +219,7 @@ export class AddonServer {
   ): Response {
     return new Response(JSON.stringify({ error, message, details }), {
       status,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
   }
 }
