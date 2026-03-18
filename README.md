@@ -1,4 +1,4 @@
-# audioio-addon-sdk
+# auddio-addon-sdk
 
 A lightweight framework for building Audiobook Addon Protocol compliant servers with Bun.
 
@@ -11,13 +11,13 @@ A lightweight framework for building Audiobook Addon Protocol compliant servers 
 ## Installation
 
 ```bash
-bun add audioio-addon-sdk
+bun add auddio-addon-sdk
 ```
 
 ## Quick Start (Scraper Addon)
 
 ```typescript
-import { AddonServer } from "audioio-addon-sdk";
+import { AddonServer } from "auddio-addon-sdk";
 
 const addon = new AddonServer({
   id: "com.example.my-scraper",
@@ -53,7 +53,7 @@ addon.listen(3000);
 The SDK provides the server plumbing. You can implement your own logic for resolving streams.
 
 ```typescript
-import { AddonServer } from "audioio-addon-sdk";
+import { AddonServer } from "auddio-addon-sdk";
 
 const addon = new AddonServer({
   id: "com.example.unified",

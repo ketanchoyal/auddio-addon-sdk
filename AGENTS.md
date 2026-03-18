@@ -1,4 +1,4 @@
-# AUDIOIO ADDON SDK (TypeScript) - PROJECT KNOWLEDGE BASE
+# AUDDIO ADDON SDK (TypeScript) - PROJECT KNOWLEDGE BASE
 
 **Generated:** 2026-02-16
 **Repo:** Separate GitHub repo
@@ -19,7 +19,7 @@ TypeScript SDK for building Audiio addons. Provides types, interfaces, and utili
 ## STRUCTURE
 
 ```
-packages/audioio-addon-sdk/
+packages/auddio-addon-sdk/
 ├── src/
 │   ├── types/          # TypeScript type definitions
 │   ├── protocol/       # Stremio protocol types
@@ -45,7 +45,7 @@ packages/audioio-addon-sdk/
 2. **NEVER commit to a different repo** - Only commit within this directory
 3. **Before committing, verify you're in the right repo**:
    ```bash
-   cd packages/audioio-addon-sdk && git status
+   cd packages/auddio-addon-sdk && git status
    ```
 
 ### Related Repos (DO NOT MIX):
@@ -55,7 +55,7 @@ packages/audioio-addon-sdk/
 | `addons/audiobook-scraper/` | Separate repo |
 | `addons/audiobook-unified-addon/` | Separate repo |
 | `addons/debrid-stream/` | Separate repo |
-| `packages/audioio-addon-sdk/` | **THIS REPO** |
+| `packages/auddio-addon-sdk/` | **THIS REPO** |
 | `packages/audioio_addon_sdk_dart/` | Separate repo |
 
 ## NOTES

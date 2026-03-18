@@ -1,5 +1,5 @@
 {
-  "name": "audioio-addon-sdk",
+  "name": "auddio-addon-sdk",
   "version": "1.0.1",
   "type": "module",
   "main": "./src/index.ts",

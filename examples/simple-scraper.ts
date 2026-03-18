@@ -6,7 +6,7 @@ const addon = new AddonServer({
   version: "1.0.0",
   type: "SCRAPER",
   capabilities: ["SEARCH"],
-  description: "A simple example scraper using audioio-addon-sdk",
+  description: "A simple example scraper using auddio-addon-sdk",
 });
 
 addon.onSearch(async (query) => {
