@@ -32,4 +32,4 @@ addon.onSearch(async (query) => {
   };
 });
 
-addon.listen(3000);
+addon.listen(Number(process.env.PORT) || 3000);
