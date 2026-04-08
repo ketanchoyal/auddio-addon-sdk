@@ -1,3 +1,6 @@
+/// <reference lib="dom" />
+/// <reference types="bun" />
+
 import {
   type SearchRequest,
   type SearchResponse,
@@ -111,7 +114,7 @@ export class AddonServer {
   listen(port: number = 3000) {
     const server = Bun.serve({
       port,
-      fetch: async (req) => {
+      fetch: async (req: Request) => {
         const url = new URL(req.url);
         const path = url.pathname;
 
