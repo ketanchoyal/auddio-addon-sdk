@@ -32,12 +32,17 @@ addon.onSearch(async (query) => {
   return {
     results: [
       {
+        infoHash: "abc123def456...",
         title: "Book Title",
-        infoHash: "...",
-        size: 123456,
+        author: "Author Name",
+        narrator: "Narrator Name",
+        size: 123456789,
+        sizeFormatted: "117.74 MiB",
         seeders: 10,
         leechers: 2,
         source: "MySource",
+        format: "MP3",
+        bitrate: "64kbps",
       }
     ],
     total: 1,
@@ -47,6 +52,27 @@ addon.onSearch(async (query) => {
 
 addon.listen(3000);
 ```
+
+---
+
+## Capabilities
+
+Capabilities define which endpoints your addon exposes. Each capability requires a corresponding handler to be registered.
+
+| Capability | Handler | Endpoint | Description |
+|------------|---------|----------|-------------|
+| `SEARCH` | `onSearch()` | `POST /search` | Search for audiobook torrents |
+| `CHECK_CACHE` | `onCheckCache()` | `POST /check-cache` | Check if torrents are cached on debrid |
+| `RESOLVE` | `onResolve()` | `POST /resolve` | Resolve torrents to streamable URLs |
+| `PROGRESS` | `onProgress()` | `GET /progress/:torrentId` | Check download progress |
+| `INFO` | `onTorrentFiles()` | `POST /info` | Get torrent file listing (no debrid needed) |
+
+**Addon Types:**
+- `SCRAPER` — Only needs `SEARCH` capability (finds torrents)
+- `DEBRID` — Only needs `CHECK_CACHE`, `RESOLVE`, `PROGRESS` (debrid operations)
+- `UNIFIED` — Combines all capabilities (search + debrid)
+
+---
 
 ## Unified Addon (with Debrid)
 
@@ -60,25 +86,61 @@ const addon = new AddonServer({
   name: "Unified Addon",
   version: "1.0.0",
   type: "UNIFIED",
-  capabilities: ["SEARCH", "CHECK_CACHE", "RESOLVE"],
+  capabilities: ["SEARCH", "CHECK_CACHE", "RESOLVE", "PROGRESS", "INFO"],
 });
 
 addon.onSearch(async (query) => {
-  // ...
+  // Search torrent indexers
+  return {
+    results: [/* ... */],
+    total: 0,
+    query: { title: query.title }
+  };
 });
 
 addon.onCheckCache(async (req) => {
-  // Check your debrid provider
+  // Check if torrents are cached on debrid provider
+  return {
+    "abc123...": { cached: true, torrentId: "rd123" },
+  };
 });
 
 addon.onResolve(async (req) => {
-  // Resolve stream URL
+  // Resolve stream URL via debrid provider
   return { 
-    torrentId: "...",
+    torrentId: "rd123abc",
     infoHash: req.infoHash,
     status: "ready",
-    files: [],
-    totalSize: 0
+    files: [
+      {
+        id: 1,
+        filename: "chapter1.mp3",
+        url: "https://real-debrid.com/...",
+        size: 15548842,
+        status: "ready",
+        mimeType: "audio/mpeg",
+      }
+    ],
+    totalSize: 15548842,
+  };
+});
+
+addon.onProgress(async (req) => {
+  // Check download progress from debrid provider
+  return {
+    infoHash: "abc123...",
+    rdTorrentId: "rd123abc",
+    status: "downloading",
+    progress: 45,
+    filename: "audiobook.mp3",
+    files: [
+      {
+        id: "1",
+        filename: "chapter1.mp3",
+        size: 15548842,
+        status: "ready",
+      }
+    ],
   };
 });
 
@@ -269,7 +331,7 @@ Full manifest shape accepted by `new AddonServer(manifest)`:
   version: string;              // SemVer, e.g. "1.0.0"
   description?: string;         // Short description
   type: "UNIFIED" | "SCRAPER" | "DEBRID";
-  capabilities: Array<"SEARCH" | "CHECK_CACHE" | "RESOLVE">;
+  capabilities: Array<"SEARCH" | "CHECK_CACHE" | "RESOLVE" | "PROGRESS" | "INFO">;
   icon?: string | null;         // URL to addon icon image
   config?: {
     fields: ConfigField[];      // See Config Fields section above
@@ -284,6 +346,85 @@ The `protocolVersion` and `endpoints` fields are injected automatically by the S
 
 ---
 
+## Torrent Files Endpoint (`POST /info`)
+
+Fetch the complete file listing for a torrent using only the info hash. No debrid API key is required — this endpoint queries public torrent caches directly.
+
+```typescript
+import { AddonServer } from "auddio-addon-sdk";
+
+const addon = new AddonServer({
+  id: "com.example.unified",
+  name: "Unified Addon",
+  version: "1.0.0",
+  type: "UNIFIED",
+  capabilities: ["SEARCH", "CHECK_CACHE", "RESOLVE", "INFO"],
+});
+
+addon.onTorrentFiles(async (req) => {
+  // Fetch torrent metadata from public torrent caches
+  // Return file listing grouped by book
+  return {
+    infoHash: req.infoHash,
+    name: "Torrent Display Name",
+    files: [
+      {
+        fileId: 1,
+        name: "chapter1.mp3",
+        path: "Book/chapter1.mp3",
+        bookName: "Book",
+        size: 15548842,
+        sizeFormatted: "14.83 MiB",
+        isAudio: true,
+      }
+    ],
+    books: [
+      {
+        bookName: "Book",
+        files: [
+          {
+            fileId: 1,
+            name: "chapter1.mp3",
+            path: "Book/chapter1.mp3",
+            bookName: "Book",
+            size: 15548842,
+            sizeFormatted: "14.83 MiB",
+            isAudio: true,
+          }
+        ]
+      }
+    ],
+    totalSize: 15548842,
+    totalSizeFormatted: "14.83 MiB",
+  };
+});
+
+addon.listen(3000);
+```
+
+### Request
+
+**Method:** `POST`  
+**Path:** `/info`  
+**Body:** `{ infoHash: string }` — 40-character hex info hash
+
+### Response
+
+```typescript
+{
+  infoHash: string;            // Normalised (lowercase) 40-char hex
+  name: string;                // Torrent display name
+  files: TorrentFileEntry[];   // Flat list of all files
+  books: TorrentBook[];        // Files grouped by book name
+  totalSize: number;           // Total size in bytes
+  totalSizeFormatted: string;  // Human-readable size (e.g., "1.76 GiB")
+}
+```
+
+See the [torrent-files-endpoint.md](../../../addons/audiio-addon/docs/torrent-files-endpoint.md) doc for full type definitions and examples.
+
+---
+
 ## API Endpoints
 
 The SDK automatically registers these HTTP endpoints when you call `addon.listen()`:
@@ -295,6 +436,59 @@ The SDK automatically registers these HTTP endpoints when you call `addon.listen
 | `POST /check-cache` | POST | Registered via `addon.onCheckCache()` |
 | `POST /resolve` | POST | Registered via `addon.onResolve()` |
 | `GET /progress/:torrentId` | GET | Registered via `addon.onProgress()` |
+| `POST /info` | POST | Registered via `addon.onTorrentFiles()` |
+
+---
+
+## Exported Types
+
+All types are exported from `auddio-addon-sdk` for use in your addon implementation:
+
+### Manifest & Config Types
+```typescript
+import type {
+  Manifest,
+  ConfigField,
+  ConfigFieldType,
+  ConfigOption,
+} from "auddio-addon-sdk";
+```
+
+### Request/Response Types
+```typescript
+import type {
+  SearchRequest,
+  SearchResponse,
+  SearchResult,
+  CheckCacheRequest,
+  CheckCacheResponse,
+  CacheStatus,
+  ResolveRequest,
+  ResolveResponse,
+  ProgressRequest,
+  ProgressResponse,
+  TorrentFilesRequest,
+  TorrentFilesResponse,
+  TorrentFileEntry,
+  TorrentBook,
+  TorrentFilesErrorResponse,
+} from "auddio-addon-sdk";
+```
+
+### Validation Schemas (Zod)
+```typescript
+import {
+  SearchRequestSchema,
+  CheckCacheRequestSchema,
+  ResolveRequestSchema,
+  ProgressRequestSchema,
+  ProgressResponseSchema,
+  TorrentFilesRequestSchema,
+  TorrentFilesResponseSchema,
+  TorrentFileEntrySchema,
+  TorrentBookSchema,
+} from "auddio-addon-sdk";
+```
 
 ---
 

@@ -25,9 +25,13 @@ export const ConfigFieldSchema = z.object({
   help: z.string().optional(),
   options: z.array(ConfigOptionSchema).optional(),
 });
-
-export const AddonTypeSchema = z.enum(['UNIFIED', 'SCRAPER', 'DEBRID']);
-export const CapabilitySchema = z.enum(['SEARCH', 'CHECK_CACHE', 'RESOLVE']);
+export const CapabilitySchema = z.enum([
+  'SEARCH',
+  'CHECK_CACHE',
+  'RESOLVE',
+  'PROGRESS',
+  'INFO',
+]);
 
 export const ManifestSchema = z.object({
   id: z.string().min(1),
@@ -35,13 +39,14 @@ export const ManifestSchema = z.object({
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
   protocolVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
   description: z.string().optional(),
-  type: AddonTypeSchema,
   capabilities: z.array(CapabilitySchema),
   icon: z.string().url().nullable().optional(),
   endpoints: z.object({
     search: z.string().optional(),
     checkCache: z.string().optional(),
     resolve: z.string().optional(),
+    progress: z.string().optional(),
+    info: z.string().optional(),
   }),
   config: z
     .object({
@@ -199,3 +204,46 @@ export const ProgressResponseSchema = z.object({
 });
 
 export type ProgressResponse = z.infer<typeof ProgressResponseSchema>;
+
+// Torrent Files endpoint types (POST /info)
+
+export const TorrentFileEntrySchema = z.object({
+  fileId: z.number().int().positive(),
+  name: z.string(),
+  path: z.string(),
+  bookName: z.string(),
+  size: z.number().int(),
+  sizeFormatted: z.string(),
+  isAudio: z.boolean(),
+});
+
+export type TorrentFileEntry = z.infer<typeof TorrentFileEntrySchema>;
+
+export const TorrentBookSchema = z.object({
+  bookName: z.string(),
+  files: z.array(TorrentFileEntrySchema),
+});
+
+export type TorrentBook = z.infer<typeof TorrentBookSchema>;
+
+export const TorrentFilesRequestSchema = z.object({
+  infoHash: z.string().regex(/^[a-fA-F0-9]{40}$/, 'Invalid info hash format'),
+});
+
+export type TorrentFilesRequest = z.infer<typeof TorrentFilesRequestSchema>;
+
+export const TorrentFilesResponseSchema = z.object({
+  infoHash: z.string(),
+  name: z.string(),
+  files: z.array(TorrentFileEntrySchema),
+  books: z.array(TorrentBookSchema),
+  totalSize: z.number().int(),
+  totalSizeFormatted: z.string(),
+});
+
+export type TorrentFilesResponse = z.infer<typeof TorrentFilesResponseSchema>;
+
+export interface TorrentFilesErrorResponse {
+  error: 'INVALID_INPUT' | 'FETCH_FAILED';
+  message: string;
+}

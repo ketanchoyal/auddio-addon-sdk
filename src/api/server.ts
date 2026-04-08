@@ -7,12 +7,15 @@ import {
   type ResolveResponse,
   type ProgressRequest,
   type ProgressResponse,
+  type TorrentFilesRequest,
+  type TorrentFilesResponse,
   type Manifest,
   ManifestSchema,
   SearchRequestSchema,
   CheckCacheRequestSchema,
   ResolveRequestSchema,
   ProgressRequestSchema,
+  TorrentFilesRequestSchema,
 } from './validators';
 import { z } from 'zod';
 
@@ -31,6 +34,9 @@ export class AddonServer {
   ) => Promise<CheckCacheResponse>;
   private resolveHandler?: (req: ResolveRequest) => Promise<ResolveResponse>;
   private progressHandler?: (req: ProgressRequest) => Promise<ProgressResponse>;
+  private torrentFilesHandler?: (
+    req: TorrentFilesRequest,
+  ) => Promise<TorrentFilesResponse>;
 
   constructor(manifest: Omit<Manifest, 'protocolVersion' | 'endpoints'>) {
     const fullManifest: Manifest = {
@@ -86,6 +92,16 @@ export class AddonServer {
     handler: (req: ProgressRequest) => Promise<ProgressResponse>,
   ): this {
     this.progressHandler = handler;
+    return this;
+  }
+
+  /**
+   * Define the torrent files handler (POST /info)
+   */
+  onTorrentFiles(
+    handler: (req: TorrentFilesRequest) => Promise<TorrentFilesResponse>,
+  ): this {
+    this.torrentFilesHandler = handler;
     return this;
   }
 
@@ -173,6 +189,19 @@ export class AddonServer {
                 401,
               );
             const result = await this.progressHandler({ apiKey, torrentId });
+            return Response.json(result, { headers: CORS_HEADERS });
+          }
+
+          if (path === '/info' && req.method === 'POST') {
+            if (!this.torrentFilesHandler)
+              return this.errorResponse(
+                'NOT_IMPLEMENTED',
+                'Torrent Files endpoint not configured',
+                501,
+              );
+            const body = await req.json();
+            const validated = TorrentFilesRequestSchema.parse(body);
+            const result = await this.torrentFilesHandler(validated);
             return Response.json(result, { headers: CORS_HEADERS });
           }
 
