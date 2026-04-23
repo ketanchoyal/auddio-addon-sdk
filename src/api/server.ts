@@ -41,25 +41,9 @@ export class AddonServer {
     req: TorrentFilesRequest,
   ) => Promise<TorrentFilesResponse>;
 
-  constructor(manifest: Omit<Manifest, 'protocolVersion' | 'endpoints'>) {
-    const fullManifest: Manifest = {
-      ...manifest,
-      protocolVersion: '1.0.0',
-      endpoints: {
-        search: manifest.capabilities.includes('SEARCH')
-          ? '/search'
-          : undefined,
-        checkCache: manifest.capabilities.includes('CHECK_CACHE')
-          ? '/check-cache'
-          : undefined,
-        resolve: manifest.capabilities.includes('RESOLVE')
-          ? '/resolve'
-          : undefined,
-      },
-    };
-
-    ManifestSchema.parse(fullManifest);
-    this.manifest = fullManifest;
+  constructor(manifest: Manifest) {
+    ManifestSchema.parse(manifest);
+    this.manifest = manifest;
   }
 
   /**

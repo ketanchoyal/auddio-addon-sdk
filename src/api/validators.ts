@@ -214,7 +214,6 @@ export const TorrentFileEntrySchema = z.object({
   bookName: z.string(),
   size: z.number().int(),
   sizeFormatted: z.string(),
-  isAudio: z.boolean(),
 });
 
 export type TorrentFileEntry = z.infer<typeof TorrentFileEntrySchema>;
@@ -227,7 +226,7 @@ export const TorrentBookSchema = z.object({
 export type TorrentBook = z.infer<typeof TorrentBookSchema>;
 
 export const TorrentFilesRequestSchema = z.object({
-  infoHash: z.string().regex(/^[a-fA-F0-9]{40}$/, 'Invalid info hash format'),
+  infoHashOrMagnet: z.string(),
 });
 
 export type TorrentFilesRequest = z.infer<typeof TorrentFilesRequestSchema>;
