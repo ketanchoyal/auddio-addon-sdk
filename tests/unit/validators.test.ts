@@ -315,26 +315,37 @@ describe("Validators", () => {
   });
 
   describe("ResolveRequestSchema", () => {
-    test("should parse valid ResolveRequest", () => {
+    test("should parse valid ResolveRequest with infohash", () => {
       const valid = {
         provider: "realdebrid",
         apiKey: "key123",
-        infoHash: "a".repeat(40),
+        infoHashOrMagnet: "a".repeat(40),
         fileIds: [1, 2, 3],
-        requireInstant: true,
-        maxWaitSeconds: 300,
       };
 
       const result = ResolveRequestSchema.parse(valid);
       expect(result.provider).toBe("realdebrid");
       expect(result.fileIds).toHaveLength(3);
+      expect(result.infoHashOrMagnet).toBe("a".repeat(40));
+    });
+
+    test("should parse valid ResolveRequest with magnet link", () => {
+      const valid = {
+        provider: "realdebrid",
+        apiKey: "key123",
+        infoHashOrMagnet: "magnet:?xt=urn:btih:" + "a".repeat(40),
+      };
+
+      const result = ResolveRequestSchema.parse(valid);
+      expect(result.provider).toBe("realdebrid");
+      expect(result.infoHashOrMagnet).toContain("magnet:");
     });
 
     test("should parse minimal ResolveRequest (only required fields)", () => {
       const valid = {
         provider: "realdebrid",
         apiKey: "key123",
-        infoHash: "a".repeat(40),
+        infoHashOrMagnet: "a".repeat(40),
       };
 
       const result = ResolveRequestSchema.parse(valid);
@@ -342,22 +353,11 @@ describe("Validators", () => {
       expect(result.fileIds).toBeUndefined();
     });
 
-    test("should reject invalid info hash", () => {
+    test("should reject empty infoHashOrMagnet", () => {
       const invalid = {
         provider: "realdebrid",
         apiKey: "key123",
-        infoHash: "not-a-valid-hash",
-      };
-
-      expect(() => ResolveRequestSchema.parse(invalid)).toThrow(z.ZodError);
-    });
-
-    test("should reject maxWaitSeconds > 600", () => {
-      const invalid = {
-        provider: "realdebrid",
-        apiKey: "key123",
-        infoHash: "a".repeat(40),
-        maxWaitSeconds: 1000,
+        infoHashOrMagnet: "",
       };
 
       expect(() => ResolveRequestSchema.parse(invalid)).toThrow(z.ZodError);

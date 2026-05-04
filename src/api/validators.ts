@@ -84,7 +84,7 @@ export type CheckCacheRequest = z.infer<typeof CheckCacheRequestSchema>;
 export const ResolveRequestSchema = z.object({
   provider: z.string().min(1),
   apiKey: z.string().min(1),
-  infoHash: z.string().regex(/^[a-fA-F0-9]{40}$/, 'Invalid info hash format'),
+  infoHashOrMagnet: z.string().min(1),
   fileIds: z.array(z.number().int()).optional(),
   torrentId: z.string().optional(),
 });

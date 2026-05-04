@@ -107,9 +107,10 @@ addon.onCheckCache(async (req) => {
 
 addon.onResolve(async (req) => {
   // Resolve stream URL via debrid provider
+  // req.infoHashOrMagnet can be either a 40-char infohash or a magnet link
   return { 
     torrentId: "rd123abc",
-    infoHash: req.infoHash,
+    infoHash: req.infoHashOrMagnet,
     status: "ready",
     files: [
       {
@@ -363,9 +364,10 @@ const addon = new AddonServer({
 
 addon.onTorrentFiles(async (req) => {
   // Fetch torrent metadata from public torrent caches
+  // req.infoHashOrMagnet can be either a 40-char infohash or a magnet link
   // Return file listing grouped by book
   return {
-    infoHash: req.infoHash,
+    infoHash: req.infoHashOrMagnet,
     name: "Torrent Display Name",
     files: [
       {
@@ -406,7 +408,7 @@ addon.listen(3000);
 
 **Method:** `POST`  
 **Path:** `/info`  
-**Body:** `{ infoHash: string }` — 40-character hex info hash
+**Body:** `{ infoHashOrMagnet: string }` — 40-character hex info hash or magnet link
 
 ### Response
 
