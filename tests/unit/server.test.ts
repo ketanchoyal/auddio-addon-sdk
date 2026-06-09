@@ -6,8 +6,11 @@ describe("AddonServer", () => {
     id: "test.addon",
     name: "Test Addon",
     version: "1.0.0",
-    type: "SCRAPER" as const,
-    capabilities: ["SEARCH"] as ("SEARCH" | "CHECK_CACHE" | "RESOLVE")[],
+    protocolVersion: "1.0.0",
+    capabilities: ["SEARCH"] as ("SEARCH" | "CHECK_CACHE" | "RESOLVE" | "PROGRESS" | "INFO")[],
+    endpoints: {
+      search: "/search",
+    },
   };
 
   test("should serve manifest.json", async () => {

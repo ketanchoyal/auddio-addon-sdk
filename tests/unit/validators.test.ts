@@ -17,8 +17,7 @@ describe("Validators", () => {
         status: "downloading" as const,
         progress: 50,
         filename: "audiobook.m4b",
-        filesize: 1000000,
-        links: ["http://example.com/file1"],
+        files: [],
       };
 
       const result = ProgressResponseSchema.parse(valid);
@@ -36,8 +35,7 @@ describe("Validators", () => {
         status: "queued" as const,
         progress: 0,
         filename: null,
-        filesize: null,
-        links: [],
+        files: [],
       };
 
       const result = ProgressResponseSchema.parse(valid);
@@ -52,8 +50,7 @@ describe("Validators", () => {
         status: "not_found" as const,
         progress: 0,
         filename: null,
-        filesize: null,
-        links: [],
+        files: [],
       };
 
       const result = ProgressResponseSchema.parse(valid);
@@ -67,8 +64,7 @@ describe("Validators", () => {
         status: "error" as const,
         progress: 0,
         filename: null,
-        filesize: null,
-        links: [],
+        files: [],
       };
 
       const result = ProgressResponseSchema.parse(valid);
@@ -82,8 +78,7 @@ describe("Validators", () => {
         status: "INVALID",
         progress: 50,
         filename: null,
-        filesize: null,
-        links: [],
+        files: [],
       };
 
       expect(() => ProgressResponseSchema.parse(invalid)).toThrow(z.ZodError);
@@ -108,8 +103,7 @@ describe("Validators", () => {
         status: "downloading" as const,
         progress: 150,
         filename: null,
-        filesize: null,
-        links: [],
+        files: [],
       };
 
       expect(() => ProgressResponseSchema.parse(invalid)).toThrow(z.ZodError);
@@ -122,8 +116,7 @@ describe("Validators", () => {
         status: "downloading" as const,
         progress: -10,
         filename: null,
-        filesize: null,
-        links: [],
+        files: [],
       };
 
       expect(() => ProgressResponseSchema.parse(invalid)).toThrow(z.ZodError);
@@ -147,8 +140,7 @@ describe("Validators", () => {
           status,
           progress: 0,
           filename: null,
-          filesize: null,
-          links: [],
+          files: [],
         };
 
         const result = ProgressResponseSchema.parse(valid);
@@ -177,7 +169,6 @@ describe("Validators", () => {
             status: "ready" as const,
           },
         ],
-        filesize: 2000000,
       };
 
       const result = ProgressResponseSchema.parse(valid);
@@ -188,18 +179,18 @@ describe("Validators", () => {
   describe("ProgressRequestSchema", () => {
     test("should parse valid ProgressRequest", () => {
       const valid = {
-        infoHash: "abc123def456",
+        torrentId: "abc123def456",
         apiKey: "key123xyz",
       };
 
       const result = ProgressRequestSchema.parse(valid);
-      expect(result.infoHash).toBe("abc123def456");
+      expect(result.torrentId).toBe("abc123def456");
       expect(result.apiKey).toBe("key123xyz");
     });
 
-    test("should reject empty infoHash", () => {
+    test("should reject empty torrentId", () => {
       const invalid = {
-        infoHash: "",
+        torrentId: "",
         apiKey: "key123",
       };
 
@@ -208,14 +199,14 @@ describe("Validators", () => {
 
     test("should reject empty apiKey", () => {
       const invalid = {
-        infoHash: "abc123",
+        torrentId: "abc123",
         apiKey: "",
       };
 
       expect(() => ProgressRequestSchema.parse(invalid)).toThrow(z.ZodError);
     });
 
-    test("should reject missing infoHash", () => {
+    test("should reject missing torrentId", () => {
       const invalid = {
         apiKey: "key123",
       };
@@ -225,7 +216,7 @@ describe("Validators", () => {
 
     test("should reject missing apiKey", () => {
       const invalid = {
-        infoHash: "abc123",
+        torrentId: "abc123",
       };
 
       expect(() => ProgressRequestSchema.parse(invalid)).toThrow(z.ZodError);
@@ -256,6 +247,21 @@ describe("Validators", () => {
     test("should allow only title (minimal)", () => {
       const result = SearchRequestSchema.parse({ title: "Book Title" });
       expect(result.title).toBe("Book Title");
+    });
+
+    test("should parse valid SearchRequest with optional book IDs", () => {
+      const valid = {
+        title: "Dune",
+        asin: "B001T35PH6",
+        hardcoverId: "hardcover-123",
+        openlibraryId: "OL26332766M",
+      };
+
+      const result = SearchRequestSchema.parse(valid);
+      expect(result.title).toBe("Dune");
+      expect(result.asin).toBe("B001T35PH6");
+      expect(result.hardcoverId).toBe("hardcover-123");
+      expect(result.openlibraryId).toBe("OL26332766M");
     });
   });
 

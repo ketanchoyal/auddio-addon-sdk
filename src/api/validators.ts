@@ -65,6 +65,9 @@ export const SearchRequestSchema = z.object({
   author: z.string().optional(),
   narrator: z.string().optional(),
   isbn: z.string().optional(),
+  asin: z.string().optional(),
+  hardcoverId: z.string().optional(),
+  openlibraryId: z.string().optional(),
   limit: z.number().int().positive().max(100).optional(),
 });
 
@@ -110,6 +113,7 @@ export interface SearchResult {
   sourceUrl?: string | null;
   uploadDate?: string | null;
   score?: number;
+  entryType?: "torrent" | "youtube";
 }
 
 export interface SearchResponse {
@@ -120,6 +124,9 @@ export interface SearchResponse {
     author?: string;
     narrator?: string;
     isbn?: string;
+    asin?: string;
+    hardcoverId?: string;
+    openlibraryId?: string;
   };
 }
 
@@ -171,7 +178,7 @@ export interface ResolveResponse {
 
 export const ProgressRequestSchema = z.object({
   apiKey: z.string().min(1),
-  torrentId: z.string(),
+  torrentId: z.string().min(1),
 });
 
 export type ProgressRequest = z.infer<typeof ProgressRequestSchema>;
