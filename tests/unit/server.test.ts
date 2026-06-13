@@ -65,15 +65,4 @@ describe("AddonServer", () => {
     const data: any = await response.json();
     expect(data.error).toBe("INVALID_INPUT");
   });
-
-  test("should handle GET /install-url request", async () => {
-    const server = new AddonServer(minimalManifest);
-    const response = await server.listen(0).fetch(
-      new Request("http://localhost/install-url?url=http%3A%2F%2Flocalhost%3A3000%2Fmanifest.json&apiKey=abc&provider=torbox")
-    );
-
-    expect(response.status).toBe(200);
-    const data: any = await response.json();
-    expect(data.url).toBe("auddio:///addon/install?url=http%3A%2F%2Flocalhost%3A3000%2Fmanifest.json&apiKey=abc&provider=torbox");
-  });
 });

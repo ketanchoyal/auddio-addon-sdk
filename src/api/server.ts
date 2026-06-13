@@ -21,7 +21,6 @@ import {
   TorrentFilesRequestSchema,
 } from './validators';
 import { z } from 'zod';
-import { getInstallDeeplink } from '../utils/deeplink';
 
 
 // CORS headers for web client support
@@ -112,18 +111,6 @@ export class AddonServer {
         try {
           if (path === '/manifest.json' && req.method === 'GET') {
             return Response.json(this.manifest, { headers: CORS_HEADERS });
-          }
-
-          if (path === '/install-url' && req.method === 'GET') {
-            const manifestUrl = url.searchParams.get('url') || '';
-            const configValues: Record<string, string> = {};
-            url.searchParams.forEach((value, key) => {
-              if (key !== 'url') {
-                configValues[key] = value;
-              }
-            });
-            const deeplink = getInstallDeeplink(manifestUrl, configValues);
-            return Response.json({ url: deeplink }, { headers: CORS_HEADERS });
           }
 
           if (path === '/search' && req.method === 'POST') {
