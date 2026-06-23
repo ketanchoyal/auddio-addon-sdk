@@ -176,7 +176,8 @@ export class AddonServer {
                 'Authorization: Bearer <apiKey> required',
                 401,
               );
-            const result = await this.progressHandler({ apiKey, torrentId });
+            const provider = url.searchParams.get('provider') || undefined;
+            const result = await this.progressHandler({ apiKey, torrentId, provider });
             return Response.json(result, { headers: CORS_HEADERS });
           }
 

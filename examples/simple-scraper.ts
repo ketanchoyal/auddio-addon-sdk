@@ -4,8 +4,11 @@ const addon = new AddonServer({
   id: "com.audioio.example-scraper",
   name: "Example Scraper",
   version: "1.0.0",
-  type: "SCRAPER",
+  protocolVersion: "1.0.0",
   capabilities: ["SEARCH"],
+  endpoints: {
+    search: "/search",
+  },
   description: "A simple example scraper using auddio-addon-sdk",
 });
 

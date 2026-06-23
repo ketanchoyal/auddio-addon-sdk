@@ -98,8 +98,8 @@ describe("AddonServer - Progress Endpoint", () => {
       );
 
       expect(handlerCalled).toBe(true);
-      expect(receivedReq?.torrentId).toBe("testhash789");
-      expect(receivedReq?.apiKey).toBe("myapikey456");
+      expect((receivedReq as any)?.torrentId).toBe("testhash789");
+      expect((receivedReq as any)?.apiKey).toBe("myapikey456");
     });
 
     test("should return 501 when onProgress is not configured", async () => {
