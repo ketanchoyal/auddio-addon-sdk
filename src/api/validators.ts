@@ -180,6 +180,7 @@ export const ProgressRequestSchema = z.object({
   apiKey: z.string().min(1),
   torrentId: z.string().min(1),
   provider: z.string().optional(),
+  fileIds: z.array(z.number().int()).optional(),
 });
 
 export type ProgressRequest = z.infer<typeof ProgressRequestSchema>;

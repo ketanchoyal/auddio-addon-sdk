@@ -177,7 +177,11 @@ export class AddonServer {
                 401,
               );
             const provider = url.searchParams.get('provider') || undefined;
-            const result = await this.progressHandler({ apiKey, torrentId, provider });
+            const fileIdsParam = url.searchParams.get('fileIds');
+            const fileIds = fileIdsParam
+              ? fileIdsParam.split(',').map((id) => parseInt(id, 10)).filter((id) => !isNaN(id))
+              : undefined;
+            const result = await this.progressHandler({ apiKey, torrentId, provider, fileIds });
             return Response.json(result, { headers: CORS_HEADERS });
           }
 
