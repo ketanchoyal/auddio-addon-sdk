@@ -12,6 +12,8 @@ import {
   type ProgressResponse,
   type TorrentFilesRequest,
   type TorrentFilesResponse,
+  type AirlockRequest,
+  type AirlockResponse,
   type Manifest,
   ManifestSchema,
   SearchRequestSchema,
@@ -19,6 +21,7 @@ import {
   ResolveRequestSchema,
   ProgressRequestSchema,
   TorrentFilesRequestSchema,
+  AirlockRequestSchema,
 } from './validators';
 import { z } from 'zod';
 
@@ -41,6 +44,7 @@ export class AddonServer {
   private torrentFilesHandler?: (
     req: TorrentFilesRequest,
   ) => Promise<TorrentFilesResponse>;
+  private airlockHandler?: (req: AirlockRequest) => Promise<AirlockResponse>;
 
   constructor(manifest: Manifest) {
     ManifestSchema.parse(manifest);
@@ -90,6 +94,16 @@ export class AddonServer {
     handler: (req: TorrentFilesRequest) => Promise<TorrentFilesResponse>,
   ): this {
     this.torrentFilesHandler = handler;
+    return this;
+  }
+
+  /**
+   * Define the airlock handler (POST /airlock).
+   * Called when the app wants to toggle permanent caching on a TorBox torrent.
+   * Only relevant for addons that use the TorBox debrid provider.
+   */
+  onAirlock(handler: (req: AirlockRequest) => Promise<AirlockResponse>): this {
+    this.airlockHandler = handler;
     return this;
   }
 
@@ -195,6 +209,19 @@ export class AddonServer {
             const body = await req.json();
             const validated = TorrentFilesRequestSchema.parse(body);
             const result = await this.torrentFilesHandler(validated);
+            return Response.json(result, { headers: CORS_HEADERS });
+          }
+
+          if (path === '/airlock' && req.method === 'POST') {
+            if (!this.airlockHandler)
+              return this.errorResponse(
+                'NOT_IMPLEMENTED',
+                'Airlock capability not configured',
+                501,
+              );
+            const body = await req.json();
+            const validated = AirlockRequestSchema.parse(body);
+            const result = await this.airlockHandler(validated);
             return Response.json(result, { headers: CORS_HEADERS });
           }
 

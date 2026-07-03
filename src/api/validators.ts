@@ -31,6 +31,7 @@ export const CapabilitySchema = z.enum([
   'RESOLVE',
   'PROGRESS',
   'INFO',
+  'AIRLOCK',
 ]);
 
 export const ManifestSchema = z.object({
@@ -47,6 +48,7 @@ export const ManifestSchema = z.object({
     resolve: z.string().optional(),
     progress: z.string().optional(),
     info: z.string().optional(),
+    airlock: z.string().optional(),
   }),
   config: z
     .object({
@@ -174,6 +176,7 @@ export interface ResolveResponse {
     size: number;
     selected: boolean;
   }>;
+  airlocked?: boolean;
 }
 
 export const ProgressRequestSchema = z.object({
@@ -210,9 +213,27 @@ export const ProgressResponseSchema = z.object({
       status: z.enum(['ready', 'downloading', 'queued', 'error']).optional(),
     }),
   ),
+  airlocked: z.boolean().optional(),
 });
 
 export type ProgressResponse = z.infer<typeof ProgressResponseSchema>;
+
+// Airlock endpoint types (POST /airlock)
+// Permanently cache a TorBox torrent to prevent 30-day inactivity deletion.
+export const AirlockRequestSchema = z.object({
+  provider: z.string().min(1),
+  apiKey: z.string().min(1),
+  torrentId: z.string().min(1),
+  airlocked: z.boolean(),
+});
+
+export type AirlockRequest = z.infer<typeof AirlockRequestSchema>;
+
+export interface AirlockResponse {
+  success: boolean;
+  airlocked: boolean;
+  torrentId: string;
+}
 
 // Torrent Files endpoint types (POST /info)
 
