@@ -9,6 +9,7 @@ A high-performance, type-safe framework for building Audiobook Addon Protocol co
 To dive deep into specific sections of the protocol and development conventions, explore our local guides:
 
 *   **[Audiobook Addon Protocol Spec](./docs/protocol.md)**: Explains the underlying JSON-over-HTTP API requests, headers, and payload structures.
+*   **[Books Catalog API Guide](./docs/catalog.md)**: Explains category & genre discovery, catalog filtering, sorting, and pagination.
 *   **[Manifest Configuration Fields Guide](./docs/config-fields.md)**: Details field definitions (`text`, `password`, `dropdown`, `checkbox`, etc.) and how client apps compile them dynamically into mobile forms.
 *   **[Stream Resolution & Caching Specs](./docs/resolution.md)**: Details debrid cache checking, the 2-step selection flow, and optimal strategies for resuming playback seamlessly.
 
@@ -171,6 +172,73 @@ addon.onProgress(async ({ torrentId, apiKey }) => {
         status: "downloading"
       }
     ]
+  };
+});
+
+addon.listen(3000);
+```
+
+---
+
+## 📖 Books Catalog Addon Example (Categories & Genres)
+
+Addons supporting the `CATALOG` capability provide discovery of categories and genres, and books list filtered by category and/or genre.
+
+```typescript
+import { AddonServer } from "auddio-addon-sdk";
+
+const addon = new AddonServer({
+  id: "com.example.catalog-addon",
+  name: "Top Audiobooks Catalog",
+  version: "1.0.0",
+  capabilities: ["CATALOG", "SEARCH"],
+  endpoints: {
+    catalog: "/catalog",
+    catalogFilters: "/catalog/filters",
+  },
+});
+
+// 1. Expose categories and genres
+addon.onCatalogFilters(async () => {
+  return {
+    categories: [
+      { id: "fiction", name: "Fiction", count: 1200 },
+      { id: "non-fiction", name: "Non-Fiction", count: 800 },
+      { id: "bestsellers", name: "Bestsellers" },
+    ],
+    genres: [
+      { id: "sci-fi", name: "Science Fiction" },
+      { id: "fantasy", name: "Fantasy" },
+      { id: "mystery", name: "Mystery" },
+      { id: "biography", name: "Biography" },
+    ],
+  };
+});
+
+// 2. Return books matching category/genre with pagination
+addon.onCatalog(async ({ category, genre, page = 1, limit = 20, sortBy }) => {
+  return {
+    books: [
+      {
+        id: "dune-1",
+        title: "Dune",
+        author: "Frank Herbert",
+        narrator: "George Guidall",
+        coverUrl: "https://example.com/dune.jpg",
+        genres: ["Science Fiction"],
+        category: "Fiction",
+        rating: 4.8,
+        publishedYear: 1965,
+        duration: 75600,
+        durationFormatted: "21h 00m",
+      },
+    ],
+    total: 1,
+    page,
+    limit,
+    hasMore: false,
+    category,
+    genre,
   };
 });
 

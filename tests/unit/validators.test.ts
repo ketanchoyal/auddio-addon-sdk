@@ -5,6 +5,12 @@ import {
   SearchRequestSchema,
   CheckCacheRequestSchema,
   ResolveRequestSchema,
+  CatalogGenreSchema,
+  CatalogCategorySchema,
+  CatalogFiltersResponseSchema,
+  CatalogRequestSchema,
+  CatalogBookSchema,
+  CatalogResponseSchema,
 } from "../../src/api/validators";
 import { z } from "zod";
 
@@ -367,6 +373,128 @@ describe("Validators", () => {
       };
 
       expect(() => ResolveRequestSchema.parse(invalid)).toThrow(z.ZodError);
+    });
+  });
+
+  describe("CatalogFiltersResponseSchema", () => {
+    test("should parse valid CatalogFiltersResponse", () => {
+      const valid = {
+        categories: [
+          {
+            id: "fiction",
+            name: "Fiction",
+            description: "Fictional works",
+            count: 100,
+            genres: [
+              { id: "sci-fi", name: "Science Fiction", count: 40 },
+              { id: "fantasy", name: "Fantasy", count: 60 },
+            ],
+          },
+        ],
+        genres: [
+          { id: "sci-fi", name: "Science Fiction", count: 40 },
+          { id: "fantasy", name: "Fantasy", count: 60 },
+        ],
+      };
+
+      const result = CatalogFiltersResponseSchema.parse(valid);
+      expect(result.categories).toHaveLength(1);
+      expect(result.categories[0]!.genres).toHaveLength(2);
+      expect(result.genres).toHaveLength(2);
+    });
+
+    test("should parse empty categories and genres with defaults", () => {
+      const result = CatalogFiltersResponseSchema.parse({});
+      expect(result.categories).toEqual([]);
+      expect(result.genres).toEqual([]);
+    });
+
+    test("should reject invalid category without name", () => {
+      expect(() =>
+        CatalogCategorySchema.parse({
+          id: "fiction",
+        }),
+      ).toThrow(z.ZodError);
+    });
+  });
+
+  describe("CatalogRequestSchema", () => {
+    test("should parse valid CatalogRequest with all parameters", () => {
+      const valid = {
+        category: "fiction",
+        genre: "sci-fi",
+        page: 2,
+        limit: 50,
+        sortBy: "popular",
+        sortOrder: "desc" as const,
+        query: "space",
+      };
+
+      const result = CatalogRequestSchema.parse(valid);
+      expect(result.category).toBe("fiction");
+      expect(result.genre).toBe("sci-fi");
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(50);
+      expect(result.sortBy).toBe("popular");
+      expect(result.sortOrder).toBe("desc");
+      expect(result.query).toBe("space");
+    });
+
+    test("should accept empty CatalogRequest with defaults", () => {
+      const result = CatalogRequestSchema.parse({});
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(20);
+    });
+
+    test("should reject negative page or limit > 100", () => {
+      expect(() => CatalogRequestSchema.parse({ page: -1 })).toThrow(z.ZodError);
+      expect(() => CatalogRequestSchema.parse({ limit: 101 })).toThrow(z.ZodError);
+    });
+  });
+
+  describe("CatalogResponseSchema", () => {
+    test("should parse valid CatalogResponse", () => {
+      const valid = {
+        books: [
+          {
+            id: "dune-1",
+            title: "Dune",
+            author: "Frank Herbert",
+            narrator: "George Guidall",
+            coverUrl: "https://example.com/dune.jpg",
+            description: "A desert planet sci-fi classic",
+            genres: ["Sci-Fi", "Adventure"],
+            category: "Fiction",
+            rating: 4.8,
+            publishedYear: 1965,
+            duration: 75600,
+            durationFormatted: "21h 00m",
+            series: "Dune",
+            seriesIndex: 1,
+            language: "en",
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 20,
+        hasMore: false,
+        category: "fiction",
+        genre: "sci-fi",
+      };
+
+      const result = CatalogResponseSchema.parse(valid);
+      expect(result.books).toHaveLength(1);
+      expect(result.books[0]!.title).toBe("Dune");
+      expect(result.books[0]!.rating).toBe(4.8);
+      expect(result.hasMore).toBe(false);
+    });
+
+    test("should reject book without title", () => {
+      expect(() =>
+        CatalogBookSchema.parse({
+          author: "Frank Herbert",
+        }),
+      ).toThrow(z.ZodError);
     });
   });
 });

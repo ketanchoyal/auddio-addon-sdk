@@ -14,6 +14,9 @@ import {
   type TorrentFilesResponse,
   type AirlockRequest,
   type AirlockResponse,
+  type CatalogFiltersResponse,
+  type CatalogRequest,
+  type CatalogResponse,
   type Manifest,
   ManifestSchema,
   SearchRequestSchema,
@@ -22,6 +25,7 @@ import {
   ProgressRequestSchema,
   TorrentFilesRequestSchema,
   AirlockRequestSchema,
+  CatalogRequestSchema,
 } from './validators';
 import { z } from 'zod';
 
@@ -45,6 +49,8 @@ export class AddonServer {
     req: TorrentFilesRequest,
   ) => Promise<TorrentFilesResponse>;
   private airlockHandler?: (req: AirlockRequest) => Promise<AirlockResponse>;
+  private catalogFiltersHandler?: () => Promise<CatalogFiltersResponse>;
+  private catalogHandler?: (req: CatalogRequest) => Promise<CatalogResponse>;
 
   constructor(manifest: Manifest) {
     ManifestSchema.parse(manifest);
@@ -104,6 +110,26 @@ export class AddonServer {
    */
   onAirlock(handler: (req: AirlockRequest) => Promise<AirlockResponse>): this {
     this.airlockHandler = handler;
+    return this;
+  }
+
+  /**
+   * Define the catalog filters capability handler (returns categories and genres list)
+   */
+  onCatalogFilters(
+    handler: () => Promise<CatalogFiltersResponse>,
+  ): this {
+    this.catalogFiltersHandler = handler;
+    return this;
+  }
+
+  /**
+   * Define the catalog books capability handler (returns books by category / genre)
+   */
+  onCatalog(
+    handler: (req: CatalogRequest) => Promise<CatalogResponse>,
+  ): this {
+    this.catalogHandler = handler;
     return this;
   }
 
@@ -222,6 +248,60 @@ export class AddonServer {
             const body = await req.json();
             const validated = AirlockRequestSchema.parse(body);
             const result = await this.airlockHandler(validated);
+            return Response.json(result, { headers: CORS_HEADERS });
+          }
+
+          if (
+            (path === '/catalog/filters' ||
+              path === '/catalog/categories' ||
+              path === '/catalog/genres') &&
+            (req.method === 'GET' || req.method === 'POST')
+          ) {
+            if (!this.catalogFiltersHandler)
+              return this.errorResponse(
+                'NOT_IMPLEMENTED',
+                'Catalog Filters capability not configured',
+                501,
+              );
+            const result = await this.catalogFiltersHandler();
+            return Response.json(result, { headers: CORS_HEADERS });
+          }
+
+          if (path === '/catalog' && (req.method === 'POST' || req.method === 'GET')) {
+            if (!this.catalogHandler)
+              return this.errorResponse(
+                'NOT_IMPLEMENTED',
+                'Catalog capability not configured',
+                501,
+              );
+            let rawReq: any = {};
+            if (req.method === 'POST') {
+              rawReq = await req.json();
+            } else {
+              const category = url.searchParams.get('category') || undefined;
+              const genre = url.searchParams.get('genre') || undefined;
+              const pageStr = url.searchParams.get('page');
+              const limitStr = url.searchParams.get('limit');
+              const sortBy = url.searchParams.get('sortBy') || undefined;
+              const sortOrder = (url.searchParams.get('sortOrder') as 'asc' | 'desc') || undefined;
+              const query = url.searchParams.get('query') || undefined;
+              const asin = url.searchParams.get('asin') || undefined;
+              const id = url.searchParams.get('id') || undefined;
+
+              rawReq = {
+                category,
+                genre,
+                page: pageStr ? parseInt(pageStr, 10) : undefined,
+                limit: limitStr ? parseInt(limitStr, 10) : undefined,
+                sortBy,
+                sortOrder,
+                query,
+                asin,
+                id,
+              };
+            }
+            const validated = CatalogRequestSchema.parse(rawReq);
+            const result = await this.catalogHandler(validated);
             return Response.json(result, { headers: CORS_HEADERS });
           }
 

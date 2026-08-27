@@ -65,4 +65,104 @@ describe("AddonServer", () => {
     const data: any = await response.json();
     expect(data.error).toBe("INVALID_INPUT");
   });
+
+  test("should handle catalog filters request", async () => {
+    const server = new AddonServer({
+      ...minimalManifest,
+      capabilities: ["CATALOG"],
+      endpoints: { catalog: "/catalog", catalogFilters: "/catalog/filters" },
+    });
+
+    server.onCatalogFilters(async () => ({
+      categories: [{ id: "fiction", name: "Fiction", count: 10 }],
+      genres: [{ id: "sci-fi", name: "Science Fiction" }],
+    }));
+
+    const response = await server.listen(0).fetch(new Request("http://localhost/catalog/filters"));
+    const data: any = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.categories).toHaveLength(1);
+    expect(data.categories[0].id).toBe("fiction");
+    expect(data.genres[0].id).toBe("sci-fi");
+  });
+
+  test("should handle catalog post request with category and genre", async () => {
+    const server = new AddonServer({
+      ...minimalManifest,
+      capabilities: ["CATALOG"],
+      endpoints: { catalog: "/catalog", catalogFilters: "/catalog/filters" },
+    });
+
+    server.onCatalog(async (req) => ({
+      books: [
+        {
+          title: "Dune",
+          author: "Frank Herbert",
+          genres: ["Sci-Fi"],
+          category: req.category,
+        },
+      ],
+      total: 1,
+      page: req.page,
+      limit: req.limit,
+      category: req.category,
+      genre: req.genre,
+    }));
+
+    const response = await server.listen(0).fetch(
+      new Request("http://localhost/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category: "fiction", genre: "sci-fi", page: 1, limit: 10 }),
+      }),
+    );
+
+    const data: any = await response.json();
+    expect(response.status).toBe(200);
+    expect(data.books).toHaveLength(1);
+    expect(data.books[0].title).toBe("Dune");
+    expect(data.category).toBe("fiction");
+    expect(data.genre).toBe("sci-fi");
+  });
+
+  test("should handle catalog GET request with query params", async () => {
+    const server = new AddonServer({
+      ...minimalManifest,
+      capabilities: ["CATALOG"],
+      endpoints: { catalog: "/catalog" },
+    });
+
+    server.onCatalog(async (req) => ({
+      books: [
+        {
+          title: "Hyperion",
+          author: "Dan Simmons",
+          genres: ["Sci-Fi"],
+        },
+      ],
+      total: 1,
+      page: req.page,
+      limit: req.limit,
+      category: req.category,
+      genre: req.genre,
+    }));
+
+    const response = await server.listen(0).fetch(
+      new Request("http://localhost/catalog?category=fiction&genre=sci-fi&page=2&limit=5"),
+    );
+
+    const data: any = await response.json();
+    expect(response.status).toBe(200);
+    expect(data.books).toHaveLength(1);
+    expect(data.books[0].title).toBe("Hyperion");
+    expect(data.page).toBe(2);
+    expect(data.limit).toBe(5);
+  });
+
+  test("should return 501 when catalog capability is not configured", async () => {
+    const server = new AddonServer(minimalManifest);
+    const response = await server.listen(0).fetch(new Request("http://localhost/catalog"));
+    expect(response.status).toBe(501);
+  });
 });

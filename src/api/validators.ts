@@ -32,6 +32,7 @@ export const CapabilitySchema = z.enum([
   'PROGRESS',
   'INFO',
   'AIRLOCK',
+  'CATALOG',
 ]);
 
 export const ManifestSchema = z.object({
@@ -49,6 +50,8 @@ export const ManifestSchema = z.object({
     progress: z.string().optional(),
     info: z.string().optional(),
     airlock: z.string().optional(),
+    catalog: z.string().optional(),
+    catalogFilters: z.string().optional(),
   }),
   config: z
     .object({
@@ -276,3 +279,78 @@ export interface TorrentFilesErrorResponse {
   error: 'INVALID_INPUT' | 'FETCH_FAILED';
   message: string;
 }
+
+// Catalog endpoint types (GET/POST /catalog/filters and POST/GET /catalog)
+
+export const CatalogGenreSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  count: z.number().int().nonnegative().optional(),
+});
+
+export type CatalogGenre = z.infer<typeof CatalogGenreSchema>;
+
+export const CatalogCategorySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  count: z.number().int().nonnegative().optional(),
+  genres: z.array(CatalogGenreSchema).optional(),
+});
+
+export type CatalogCategory = z.infer<typeof CatalogCategorySchema>;
+
+export const CatalogFiltersResponseSchema = z.object({
+  categories: z.array(CatalogCategorySchema).default([]),
+  genres: z.array(CatalogGenreSchema).default([]),
+});
+
+export type CatalogFiltersResponse = z.infer<typeof CatalogFiltersResponseSchema>;
+
+export const CatalogRequestSchema = z.object({
+  category: z.string().optional(),
+  genre: z.string().optional(),
+  page: z.number().int().positive().default(1).optional(),
+  limit: z.number().int().positive().max(100).default(20).optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+  query: z.string().optional(),
+  asin: z.string().optional(),
+  id: z.string().optional(),
+});
+
+export type CatalogRequest = z.infer<typeof CatalogRequestSchema>;
+
+export const CatalogBookSchema = z.object({
+  id: z.string().optional(),
+  asin: z.string().nullable().optional(),
+  title: z.string().min(1),
+  author: z.string().nullable().optional(),
+  narrator: z.string().nullable().optional(),
+  coverUrl: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  genres: z.array(z.string()).optional(),
+  category: z.string().nullable().optional(),
+  rating: z.number().nullable().optional(),
+  publishedYear: z.number().int().nullable().optional(),
+  duration: z.number().nullable().optional(),
+  durationFormatted: z.string().nullable().optional(),
+  series: z.string().nullable().optional(),
+  seriesIndex: z.number().nullable().optional(),
+  language: z.string().nullable().optional(),
+});
+
+export type CatalogBook = z.infer<typeof CatalogBookSchema>;
+
+export const CatalogResponseSchema = z.object({
+  books: z.array(CatalogBookSchema),
+  total: z.number().int().nonnegative().optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+  hasMore: z.boolean().optional(),
+  category: z.string().optional(),
+  genre: z.string().optional(),
+});
+
+export type CatalogResponse = z.infer<typeof CatalogResponseSchema>;

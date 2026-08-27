@@ -214,3 +214,64 @@ Retrieves the raw internal files structure grouped by book name without contacti
       "totalSizeFormatted": "153.77 MiB"
     }
     ```
+
+---
+
+### 7. Books Catalog & Filters (`GET /catalog/filters` and `POST /catalog`)
+Enables discovery of categories and genres, and retrieving books collections filtered by category, genre, sorting, and pagination.
+
+#### Discover Categories & Genres (`GET /catalog/filters`)
+*   **Request Method**: `GET` (or `POST`)
+*   **Response Body (`CatalogFiltersResponse`)**:
+    ```json
+    {
+      "categories": [
+        { "id": "fiction", "name": "Fiction", "count": 1420 },
+        { "id": "non-fiction", "name": "Non-Fiction", "count": 980 }
+      ],
+      "genres": [
+        { "id": "sci-fi", "name": "Sci-Fi", "description": "Science Fiction" },
+        { "id": "fantasy", "name": "Fantasy", "description": "Fantasy" },
+        { "id": "mystery", "name": "Mystery", "description": "Mystery & Suspense" }
+      ]
+    }
+    ```
+
+#### Fetch Catalog Books (`POST /catalog` or `GET /catalog`)
+*   **Request Method**: `POST` (JSON body) or `GET` (Query Parameters)
+*   **Request Body (`CatalogRequest`)**:
+    ```json
+    {
+      "category": "fiction",
+      "genre": "sci-fi",
+      "page": 1,
+      "limit": 20,
+      "sortBy": "popular"
+    }
+    ```
+*   **Response Body (`CatalogResponse`)**:
+    ```json
+    {
+      "books": [
+        {
+          "id": "dune",
+          "title": "Dune",
+          "author": "Frank Herbert",
+          "narrator": "George Guidall",
+          "coverUrl": "https://covers.openlibrary.org/b/id/123456-L.jpg",
+          "genres": ["Sci-Fi", "Adventure"],
+          "category": "Fiction",
+          "rating": 4.8,
+          "publishedYear": 1965,
+          "duration": 75600,
+          "durationFormatted": "21h 00m"
+        }
+      ],
+      "total": 350,
+      "page": 1,
+      "limit": 20,
+      "hasMore": true,
+      "category": "fiction",
+      "genre": "sci-fi"
+    }
+    ```
