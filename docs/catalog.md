@@ -109,6 +109,7 @@ Fetches a paginated list of books matching the specified category and/or genre f
     {
       "id": "B002V1OF70",
       "asin": "B002V1OF70",
+      "asinRegion": "us",
       "title": "Dune",
       "author": "Frank Herbert",
       "coverUrl": "https://m.media-amazon.com/images/I/91dSMhdIzTL._SL500_.jpg"

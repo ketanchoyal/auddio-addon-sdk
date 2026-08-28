@@ -119,6 +119,8 @@ export interface SearchResult {
   uploadDate?: string | null;
   score?: number;
   entryType?: "torrent" | "youtube";
+  asin?: string | null;
+  asinRegion?: string | null;
 }
 
 export interface SearchResponse {
@@ -329,6 +331,7 @@ export type CatalogRequest = z.infer<typeof CatalogRequestSchema>;
 export const CatalogBookSchema = z.object({
   id: z.string().optional(),
   asin: z.string().nullable().optional(),
+  asinRegion: z.string().nullable().optional(),
   title: z.string().min(1),
   author: z.string().nullable().optional(),
   coverUrl: z.string().nullable().optional(),
