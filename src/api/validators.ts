@@ -299,6 +299,12 @@ export const CatalogCategorySchema = z.object({
 
 export type CatalogCategory = z.infer<typeof CatalogCategorySchema>;
 
+export const CatalogFiltersRequestSchema = z.object({
+  random: z.boolean().optional(),
+});
+
+export type CatalogFiltersRequest = z.infer<typeof CatalogFiltersRequestSchema>;
+
 export const CatalogFiltersResponseSchema = z.object({
   categories: z.array(CatalogCategorySchema).default([]),
   genres: z.array(CatalogGenreSchema).default([]),
@@ -316,7 +322,6 @@ export const CatalogRequestSchema = z.object({
   query: z.string().optional(),
   asin: z.string().optional(),
   id: z.string().optional(),
-  random: z.boolean().optional(),
 });
 
 export type CatalogRequest = z.infer<typeof CatalogRequestSchema>;

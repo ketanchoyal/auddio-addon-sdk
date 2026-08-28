@@ -14,6 +14,7 @@ import {
   type TorrentFilesResponse,
   type AirlockRequest,
   type AirlockResponse,
+  type CatalogFiltersRequest,
   type CatalogFiltersResponse,
   type CatalogRequest,
   type CatalogResponse,
@@ -25,6 +26,8 @@ import {
   ProgressRequestSchema,
   TorrentFilesRequestSchema,
   AirlockRequestSchema,
+  CatalogFiltersRequestSchema,
+  CatalogFiltersResponseSchema,
   CatalogRequestSchema,
   CatalogResponseSchema,
 } from './validators';
@@ -50,7 +53,9 @@ export class AddonServer {
     req: TorrentFilesRequest,
   ) => Promise<TorrentFilesResponse>;
   private airlockHandler?: (req: AirlockRequest) => Promise<AirlockResponse>;
-  private catalogFiltersHandler?: () => Promise<CatalogFiltersResponse>;
+  private catalogFiltersHandler?: (
+    req: CatalogFiltersRequest,
+  ) => Promise<CatalogFiltersResponse>;
   private catalogHandler?: (req: CatalogRequest) => Promise<CatalogResponse>;
 
   constructor(manifest: Manifest) {
@@ -118,7 +123,7 @@ export class AddonServer {
    * Define the catalog filters capability handler (returns categories and genres list)
    */
   onCatalogFilters(
-    handler: () => Promise<CatalogFiltersResponse>,
+    handler: (req: CatalogFiltersRequest) => Promise<CatalogFiltersResponse>,
   ): this {
     this.catalogFiltersHandler = handler;
     return this;
@@ -264,8 +269,22 @@ export class AddonServer {
                 'Catalog Filters capability not configured',
                 501,
               );
-            const result = await this.catalogFiltersHandler();
-            return Response.json(result, { headers: CORS_HEADERS });
+            let rawReq: any = {};
+            if (req.method === 'POST') {
+              try {
+                rawReq = await req.json();
+              } catch {
+                rawReq = {};
+              }
+            } else {
+              const randomParam = url.searchParams.get('random');
+              const random = randomParam === 'true' || randomParam === '1' ? true : undefined;
+              rawReq = { random };
+            }
+            const validated = CatalogFiltersRequestSchema.parse(rawReq);
+            const result = await this.catalogFiltersHandler(validated);
+            const validatedResult = CatalogFiltersResponseSchema.parse(result);
+            return Response.json(validatedResult, { headers: CORS_HEADERS });
           }
 
           if (path === '/catalog' && (req.method === 'POST' || req.method === 'GET')) {
@@ -288,8 +307,6 @@ export class AddonServer {
               const query = url.searchParams.get('query') || undefined;
               const asin = url.searchParams.get('asin') || undefined;
               const id = url.searchParams.get('id') || undefined;
-              const randomParam = url.searchParams.get('random');
-              const random = randomParam === 'true' || randomParam === '1' ? true : undefined;
 
               rawReq = {
                 category,
@@ -301,7 +318,6 @@ export class AddonServer {
                 query,
                 asin,
                 id,
-                random,
               };
             }
             const validated = CatalogRequestSchema.parse(rawReq);

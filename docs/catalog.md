@@ -28,12 +28,20 @@ To support catalogs, declare the `'CATALOG'` capability in your addon's manifest
 
 ## 📡 API Endpoints
 
-### 1. Discover Categories & Genres (`GET /catalog/filters`)
+### 1. Discover Categories & Genres (`GET /catalog/filters` or `POST /catalog/filters`)
 
 Used by the client to populate category tabs, genre chips, and navigation menus.
 
 * **Method**: `GET` (or `POST`)
 * **Endpoint**: `/catalog/filters` (also responds on `/catalog/categories` and `/catalog/genres`)
+* **Query Parameters** (for `GET`):
+  * `random`: `true` or `1` to request randomized category and genre discovery
+* **Request Payload (`CatalogFiltersRequest`)** (for `POST`):
+  ```json
+  {
+    "random": true
+  }
+  ```
 * **Response Body (`CatalogFiltersResponse`)**:
 
 ```json
@@ -42,32 +50,18 @@ Used by the client to populate category tabs, genre chips, and navigation menus.
     {
       "id": "fiction",
       "name": "Fiction",
-      "description": "Fictional stories and audiobooks",
-      "count": 1420,
-      "genres": [
-        { "id": "sci-fi", "name": "Sci-Fi", "count": 350 },
-        { "id": "fantasy", "name": "Fantasy", "count": 420 },
-        { "id": "thriller", "name": "Thriller", "count": 290 }
-      ]
+      "description": "Fictional stories and audiobooks"
     },
     {
       "id": "non-fiction",
       "name": "Non-Fiction",
-      "description": "Educational and real-world audiobooks",
-      "count": 980
-    },
-    {
-      "id": "bestsellers",
-      "name": "Bestsellers",
-      "description": "Current top popular audiobooks"
+      "description": "Educational and real-world audiobooks"
     }
   ],
   "genres": [
     { "id": "sci-fi", "name": "Sci-Fi", "description": "Science Fiction" },
     { "id": "fantasy", "name": "Fantasy", "description": "Fantasy and Magic" },
-    { "id": "mystery", "name": "Mystery", "description": "Crime & Detective" },
-    { "id": "biography", "name": "Biography", "description": "Memoirs and Biographies" },
-    { "id": "self-help", "name": "Self-Help", "description": "Personal Development" }
+    { "id": "mystery", "name": "Mystery", "description": "Crime & Detective" }
   ]
 }
 ```
@@ -101,7 +95,7 @@ Fetches a paginated list of books matching the specified category and/or genre f
   * `genre`: Genre slug/ID
   * `page`: Page index (1-based, default: `1`)
   * `limit`: Page size (default: `20`, max: `100`)
-  * `sortBy`: Sorting field (`popular`, `rating`, `latest`, `title`, `trending`)
+  * `sortBy`: Sorting field (`popular`, `latest`, `title`, `author`, `size`)
   * `sortOrder`: `asc` or `desc`
   * `query`: Optional text search query within this category/genre
   * `asin`: Optional Audible ASIN to fetch a specific book
@@ -159,8 +153,8 @@ const addon = new AddonServer({
   },
 });
 
-// 1. Return available categories and genres
-addon.onCatalogFilters(async () => {
+// 1. Return available categories and genres (supports random exploration)
+addon.onCatalogFilters(async ({ random }) => {
   return {
     categories: [
       { id: "fiction", name: "Fiction" },

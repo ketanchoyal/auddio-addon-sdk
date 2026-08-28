@@ -7,6 +7,7 @@ import {
   ResolveRequestSchema,
   CatalogGenreSchema,
   CatalogCategorySchema,
+  CatalogFiltersRequestSchema,
   CatalogFiltersResponseSchema,
   CatalogRequestSchema,
   CatalogBookSchema,
@@ -376,6 +377,18 @@ describe("Validators", () => {
     });
   });
 
+  describe("CatalogFiltersRequestSchema", () => {
+    test("should parse valid CatalogFiltersRequest with random parameter", () => {
+      const result = CatalogFiltersRequestSchema.parse({ random: true });
+      expect(result.random).toBe(true);
+    });
+
+    test("should accept empty CatalogFiltersRequest", () => {
+      const result = CatalogFiltersRequestSchema.parse({});
+      expect(result.random).toBeUndefined();
+    });
+  });
+
   describe("CatalogFiltersResponseSchema", () => {
     test("should parse valid CatalogFiltersResponse", () => {
       const valid = {
@@ -427,7 +440,6 @@ describe("Validators", () => {
         sortBy: "popular",
         sortOrder: "desc" as const,
         query: "space",
-        random: true,
       };
 
       const result = CatalogRequestSchema.parse(valid);
@@ -438,7 +450,6 @@ describe("Validators", () => {
       expect(result.sortBy).toBe("popular");
       expect(result.sortOrder).toBe("desc");
       expect(result.query).toBe("space");
-      expect(result.random).toBe(true);
     });
 
     test("should accept empty CatalogRequest with defaults", () => {
