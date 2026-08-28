@@ -331,18 +331,7 @@ export const CatalogBookSchema = z.object({
   asin: z.string().nullable().optional(),
   title: z.string().min(1),
   author: z.string().nullable().optional(),
-  narrator: z.string().nullable().optional(),
   coverUrl: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  genres: z.array(z.string()).optional(),
-  category: z.string().nullable().optional(),
-  rating: z.number().nullable().optional(),
-  publishedYear: z.number().int().nullable().optional(),
-  duration: z.number().nullable().optional(),
-  durationFormatted: z.string().nullable().optional(),
-  series: z.string().nullable().optional(),
-  seriesIndex: z.number().nullable().optional(),
-  language: z.string().nullable().optional(),
 });
 
 export type CatalogBook = z.infer<typeof CatalogBookSchema>;

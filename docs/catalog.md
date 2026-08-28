@@ -111,18 +111,7 @@ Fetches a paginated list of books matching the specified category and/or genre f
       "asin": "B002V1OF70",
       "title": "Dune",
       "author": "Frank Herbert",
-      "narrator": "George Guidall",
-      "coverUrl": "https://m.media-amazon.com/images/I/91dSMhdIzTL._SL500_.jpg",
-      "description": "Set on the desert planet Arrakis, Dune tells the story of Paul Atreides...",
-      "genres": ["Sci-Fi", "Adventure"],
-      "category": "Fiction",
-      "rating": 4.8,
-      "publishedYear": 1965,
-      "duration": 75600,
-      "durationFormatted": "21h 00m",
-      "series": "Dune, Book 1",
-      "seriesIndex": 1,
-      "language": "en"
+      "coverUrl": "https://m.media-amazon.com/images/I/91dSMhdIzTL._SL500_.jpg"
     }
   ],
   "page": 1,

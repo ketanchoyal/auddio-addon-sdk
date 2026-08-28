@@ -221,16 +221,10 @@ addon.onCatalog(async ({ category, genre, page = 1, limit = 20, sortBy }) => {
     books: [
       {
         id: "dune-1",
+        asin: "B002V1OF70",
         title: "Dune",
         author: "Frank Herbert",
-        narrator: "George Guidall",
         coverUrl: "https://example.com/dune.jpg",
-        genres: ["Science Fiction"],
-        category: "Fiction",
-        rating: 4.8,
-        publishedYear: 1965,
-        duration: 75600,
-        durationFormatted: "21h 00m",
       },
     ],
     page,

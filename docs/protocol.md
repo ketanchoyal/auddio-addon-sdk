@@ -255,16 +255,10 @@ Enables discovery of categories and genres, and retrieving books collections fil
       "books": [
         {
           "id": "dune",
+          "asin": "B002V1OF70",
           "title": "Dune",
           "author": "Frank Herbert",
-          "narrator": "George Guidall",
-          "coverUrl": "https://covers.openlibrary.org/b/id/123456-L.jpg",
-          "genres": ["Sci-Fi", "Adventure"],
-          "category": "Fiction",
-          "rating": 4.8,
-          "publishedYear": 1965,
-          "duration": 75600,
-          "durationFormatted": "21h 00m"
+          "coverUrl": "https://covers.openlibrary.org/b/id/123456-L.jpg"
         }
       ],
       "page": 1,

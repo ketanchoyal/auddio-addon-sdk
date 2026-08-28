@@ -470,20 +470,10 @@ describe("Validators", () => {
         books: [
           {
             id: "dune-1",
+            asin: "B001T35PH6",
             title: "Dune",
             author: "Frank Herbert",
-            narrator: "George Guidall",
             coverUrl: "https://example.com/dune.jpg",
-            description: "A desert planet sci-fi classic",
-            genres: ["Sci-Fi", "Adventure"],
-            category: "Fiction",
-            rating: 4.8,
-            publishedYear: 1965,
-            duration: 75600,
-            durationFormatted: "21h 00m",
-            series: "Dune",
-            seriesIndex: 1,
-            language: "en",
           },
         ],
         page: 1,
@@ -496,7 +486,7 @@ describe("Validators", () => {
       const result = CatalogResponseSchema.parse(valid);
       expect(result.books).toHaveLength(1);
       expect(result.books[0]!.title).toBe("Dune");
-      expect(result.books[0]!.rating).toBe(4.8);
+      expect(result.books[0]!.coverUrl).toBe("https://example.com/dune.jpg");
       expect(result.hasMore).toBe(false);
     });
 
