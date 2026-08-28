@@ -202,8 +202,8 @@ const addon = new AddonServer({
 addon.onCatalogFilters(async () => {
   return {
     categories: [
-      { id: "fiction", name: "Fiction", count: 1200 },
-      { id: "non-fiction", name: "Non-Fiction", count: 800 },
+      { id: "fiction", name: "Fiction" },
+      { id: "non-fiction", name: "Non-Fiction" },
       { id: "bestsellers", name: "Bestsellers" },
     ],
     genres: [
@@ -233,7 +233,6 @@ addon.onCatalog(async ({ category, genre, page = 1, limit = 20, sortBy }) => {
         durationFormatted: "21h 00m",
       },
     ],
-    total: 1,
     page,
     limit,
     hasMore: false,

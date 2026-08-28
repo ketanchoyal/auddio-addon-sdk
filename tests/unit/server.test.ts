@@ -74,7 +74,7 @@ describe("AddonServer", () => {
     });
 
     server.onCatalogFilters(async () => ({
-      categories: [{ id: "fiction", name: "Fiction", count: 10 }],
+      categories: [{ id: "fiction", name: "Fiction" }],
       genres: [{ id: "sci-fi", name: "Science Fiction" }],
     }));
 
@@ -103,9 +103,9 @@ describe("AddonServer", () => {
           category: req.category,
         },
       ],
-      total: 1,
       page: req.page,
       limit: req.limit,
+      hasMore: false,
       category: req.category,
       genre: req.genre,
     }));
@@ -124,6 +124,9 @@ describe("AddonServer", () => {
     expect(data.books[0].title).toBe("Dune");
     expect(data.category).toBe("fiction");
     expect(data.genre).toBe("sci-fi");
+    expect(data.page).toBe(1);
+    expect(data.limit).toBe(10);
+    expect(data.hasMore).toBe(false);
   });
 
   test("should handle catalog GET request with query params", async () => {
@@ -141,9 +144,9 @@ describe("AddonServer", () => {
           genres: ["Sci-Fi"],
         },
       ],
-      total: 1,
       page: req.page,
       limit: req.limit,
+      hasMore: false,
       category: req.category,
       genre: req.genre,
     }));
@@ -158,6 +161,34 @@ describe("AddonServer", () => {
     expect(data.books[0].title).toBe("Hyperion");
     expect(data.page).toBe(2);
     expect(data.limit).toBe(5);
+    expect(data.hasMore).toBe(false);
+  });
+
+  test("should default page and limit in CatalogRequest when omitted", async () => {
+    const server = new AddonServer({
+      ...minimalManifest,
+      capabilities: ["CATALOG"],
+      endpoints: { catalog: "/catalog" },
+    });
+
+    let receivedPage: number | undefined;
+    let receivedLimit: number | undefined;
+
+    server.onCatalog(async (req) => {
+      receivedPage = req.page;
+      receivedLimit = req.limit;
+      return {
+        books: [],
+        page: req.page,
+        limit: req.limit,
+        hasMore: false,
+      };
+    });
+
+    const res = await server.listen(0).fetch(new Request("http://localhost/catalog"));
+    expect(res.status).toBe(200);
+    expect(receivedPage).toBe(1);
+    expect(receivedLimit).toBe(20);
   });
 
   test("should return 501 when catalog capability is not configured", async () => {

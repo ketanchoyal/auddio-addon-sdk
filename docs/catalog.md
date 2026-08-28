@@ -131,7 +131,6 @@ Fetches a paginated list of books matching the specified category and/or genre f
       "language": "en"
     }
   ],
-  "total": 350,
   "page": 1,
   "limit": 20,
   "hasMore": true,
@@ -175,16 +174,14 @@ addon.onCatalogFilters(async () => {
   };
 });
 
-// 2. Return books filtered by category and genre
-addon.onCatalog(async ({ category, genre, page = 1, limit = 20, sortBy }) => {
-  const books = await fetchBooksFromDatabase({ category, genre, page, limit, sortBy });
-
+// 2. Return books filtered by category and genre with pagination
+addon.onCatalog(async ({ category, genre, page, limit, sortBy }) => {
+  const { books, hasMore } = await fetchBooksFromDatabase({ category, genre, page, limit, sortBy });
   return {
     books,
-    total: books.length,
     page,
     limit,
-    hasMore: false,
+    hasMore,
     category,
     genre,
   };

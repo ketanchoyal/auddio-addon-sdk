@@ -226,8 +226,8 @@ Enables discovery of categories and genres, and retrieving books collections fil
     ```json
     {
       "categories": [
-        { "id": "fiction", "name": "Fiction", "count": 1420 },
-        { "id": "non-fiction", "name": "Non-Fiction", "count": 980 }
+        { "id": "fiction", "name": "Fiction" },
+        { "id": "non-fiction", "name": "Non-Fiction" }
       ],
       "genres": [
         { "id": "sci-fi", "name": "Sci-Fi", "description": "Science Fiction" },
@@ -267,7 +267,6 @@ Enables discovery of categories and genres, and retrieving books collections fil
           "durationFormatted": "21h 00m"
         }
       ],
-      "total": 350,
       "page": 1,
       "limit": 20,
       "hasMore": true,

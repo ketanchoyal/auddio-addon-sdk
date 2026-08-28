@@ -26,6 +26,7 @@ import {
   TorrentFilesRequestSchema,
   AirlockRequestSchema,
   CatalogRequestSchema,
+  CatalogResponseSchema,
 } from './validators';
 import { z } from 'zod';
 
@@ -302,7 +303,8 @@ export class AddonServer {
             }
             const validated = CatalogRequestSchema.parse(rawReq);
             const result = await this.catalogHandler(validated);
-            return Response.json(result, { headers: CORS_HEADERS });
+            const validatedResult = CatalogResponseSchema.parse(result);
+            return Response.json(validatedResult, { headers: CORS_HEADERS });
           }
 
           return this.errorResponse(

@@ -384,16 +384,15 @@ describe("Validators", () => {
             id: "fiction",
             name: "Fiction",
             description: "Fictional works",
-            count: 100,
             genres: [
-              { id: "sci-fi", name: "Science Fiction", count: 40 },
-              { id: "fantasy", name: "Fantasy", count: 60 },
+              { id: "sci-fi", name: "Science Fiction" },
+              { id: "fantasy", name: "Fantasy" },
             ],
           },
         ],
         genres: [
-          { id: "sci-fi", name: "Science Fiction", count: 40 },
-          { id: "fantasy", name: "Fantasy", count: 60 },
+          { id: "sci-fi", name: "Science Fiction" },
+          { id: "fantasy", name: "Fantasy" },
         ],
       };
 
@@ -474,7 +473,6 @@ describe("Validators", () => {
             language: "en",
           },
         ],
-        total: 1,
         page: 1,
         limit: 20,
         hasMore: false,
