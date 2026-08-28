@@ -316,6 +316,7 @@ export const CatalogRequestSchema = z.object({
   query: z.string().optional(),
   asin: z.string().optional(),
   id: z.string().optional(),
+  random: z.boolean().optional(),
 });
 
 export type CatalogRequest = z.infer<typeof CatalogRequestSchema>;

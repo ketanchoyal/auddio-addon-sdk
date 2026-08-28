@@ -288,6 +288,8 @@ export class AddonServer {
               const query = url.searchParams.get('query') || undefined;
               const asin = url.searchParams.get('asin') || undefined;
               const id = url.searchParams.get('id') || undefined;
+              const randomParam = url.searchParams.get('random');
+              const random = randomParam === 'true' || randomParam === '1' ? true : undefined;
 
               rawReq = {
                 category,
@@ -299,6 +301,7 @@ export class AddonServer {
                 query,
                 asin,
                 id,
+                random,
               };
             }
             const validated = CatalogRequestSchema.parse(rawReq);

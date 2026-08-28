@@ -191,6 +191,30 @@ describe("AddonServer", () => {
     expect(receivedLimit).toBe(20);
   });
 
+  test("should parse random query parameter in GET /catalog", async () => {
+    const server = new AddonServer({
+      ...minimalManifest,
+      capabilities: ["CATALOG"],
+      endpoints: { catalog: "/catalog" },
+    });
+
+    let receivedRandom: boolean | undefined;
+
+    server.onCatalog(async (req) => {
+      receivedRandom = req.random;
+      return {
+        books: [],
+        page: req.page,
+        limit: req.limit,
+        hasMore: false,
+      };
+    });
+
+    const res = await server.listen(0).fetch(new Request("http://localhost/catalog?random=true"));
+    expect(res.status).toBe(200);
+    expect(receivedRandom).toBe(true);
+  });
+
   test("should return 501 when catalog capability is not configured", async () => {
     const server = new AddonServer(minimalManifest);
     const response = await server.listen(0).fetch(new Request("http://localhost/catalog"));

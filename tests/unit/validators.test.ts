@@ -427,6 +427,7 @@ describe("Validators", () => {
         sortBy: "popular",
         sortOrder: "desc" as const,
         query: "space",
+        random: true,
       };
 
       const result = CatalogRequestSchema.parse(valid);
@@ -437,6 +438,7 @@ describe("Validators", () => {
       expect(result.sortBy).toBe("popular");
       expect(result.sortOrder).toBe("desc");
       expect(result.query).toBe("space");
+      expect(result.random).toBe(true);
     });
 
     test("should accept empty CatalogRequest with defaults", () => {
