@@ -152,13 +152,26 @@ export type CheckCacheResponse = Record<string, CacheStatus>;
 export interface ResolveResponse {
   torrentId: string;
   infoHash: string;
+  /**
+   * Overall resolve status:
+   * - 'ready': All requested audio files are downloaded/cached and ready to stream.
+   * - 'partial': Some files are ready, others are still downloading.
+   * - 'downloading': Files are currently downloading on the debrid provider.
+   * - 'queued': Torrent is queued on the debrid provider.
+   * - 'selection_required': Multiple audio files exist in the torrent; client must select which fileIds to download.
+   * - 'metadata_pending': Torrent was added to the debrid provider, but file metadata (file list, sizes)
+   *   is still being fetched from the BitTorrent swarm by the provider. The client should inform the user
+   *   that the torrent was added to their debrid account and to check back shortly.
+   * - 'error': An error occurred during resolution.
+   */
   status:
     | 'ready'
     | 'partial'
     | 'downloading'
     | 'queued'
     | 'error'
-    | 'selection_required';
+    | 'selection_required'
+    | 'metadata_pending';
   progress?: number;
   files: Array<{
     id?: number;
@@ -180,6 +193,10 @@ export interface ResolveResponse {
     selected: boolean;
   }>;
   airlocked?: boolean;
+  /** Optional human-readable message, e.g. for informational or error descriptions */
+  message?: string;
+  /** Optional machine-readable error or status code, e.g. 'METADATA_PENDING', 'UNSUPPORTED_PROVIDER' */
+  code?: string;
 }
 
 export const ProgressRequestSchema = z.object({
@@ -200,6 +217,7 @@ export const ProgressResponseSchema = z.object({
     'downloading',
     'downloaded',
     'selection_required',
+    'metadata_pending',
     'error',
     'stale',
     'not_found',
@@ -217,6 +235,8 @@ export const ProgressResponseSchema = z.object({
     }),
   ),
   airlocked: z.boolean().optional(),
+  message: z.string().optional(),
+  code: z.string().optional(),
 });
 
 export type ProgressResponse = z.infer<typeof ProgressResponseSchema>;

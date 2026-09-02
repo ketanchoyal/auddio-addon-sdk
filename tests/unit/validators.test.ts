@@ -50,18 +50,21 @@ describe("Validators", () => {
       expect(result.filename).toBeNull();
     });
 
-    test("should parse ProgressResponse with 'not_found' status", () => {
-      const valid = {
-        infoHash: "notfound123",
-        rdTorrentId: null,
-        status: "not_found" as const,
+    test('should parse ProgressResponse with metadata_pending status', () => {
+      const validResponse = {
+        infoHash: '1234567890123456789012345678901234567890',
+        rdTorrentId: 'tb-123',
+        status: 'metadata_pending',
         progress: 0,
         filename: null,
         files: [],
+        code: 'METADATA_PENDING',
+        message: 'Fetching metadata from swarm',
       };
 
-      const result = ProgressResponseSchema.parse(valid);
-      expect(result.status).toBe("not_found");
+      const result = ProgressResponseSchema.parse(validResponse);
+      expect(result.status).toBe('metadata_pending');
+      expect(result.code).toBe('METADATA_PENDING');
     });
 
     test("should parse ProgressResponse with 'error' status", () => {
