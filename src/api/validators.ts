@@ -119,6 +119,8 @@ export interface SearchResult {
   uploadDate?: string | null;
   score?: number;
   entryType?: "torrent" | "youtube";
+  asin?: string | null;
+  asinRegion?: string | null;
 }
 
 export interface SearchResponse {
