@@ -71,8 +71,12 @@ export const SearchRequestSchema = z.object({
   narrator: z.string().optional(),
   isbn: z.string().optional(),
   asin: z.string().optional(),
+  appleBookId: z.string().optional(),
+  appleId: z.string().optional(),
   hardcoverId: z.string().optional(),
+  googleBooksId: z.string().optional(),
   openlibraryId: z.string().optional(),
+  librivoxId: z.string().optional(),
   limit: z.number().int().positive().max(100).optional(),
 });
 

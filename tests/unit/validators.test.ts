@@ -263,15 +263,23 @@ describe("Validators", () => {
       const valid = {
         title: "Dune",
         asin: "B001T35PH6",
+        appleBookId: "123456789",
+        appleId: "123456789",
         hardcoverId: "hardcover-123",
+        googleBooksId: "zyTCAlFPjgYC",
         openlibraryId: "OL26332766M",
+        librivoxId: "9876",
       };
 
       const result = SearchRequestSchema.parse(valid);
       expect(result.title).toBe("Dune");
       expect(result.asin).toBe("B001T35PH6");
+      expect(result.appleBookId).toBe("123456789");
+      expect(result.appleId).toBe("123456789");
       expect(result.hardcoverId).toBe("hardcover-123");
+      expect(result.googleBooksId).toBe("zyTCAlFPjgYC");
       expect(result.openlibraryId).toBe("OL26332766M");
+      expect(result.librivoxId).toBe("9876");
     });
   });
 
