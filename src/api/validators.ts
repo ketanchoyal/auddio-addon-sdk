@@ -136,8 +136,12 @@ export interface SearchResponse {
     narrator?: string;
     isbn?: string;
     asin?: string;
+    appleBookId?: string;
+    appleId?: string;
     hardcoverId?: string;
+    googleBooksId?: string;
     openlibraryId?: string;
+    librivoxId?: string;
   };
 }
 
